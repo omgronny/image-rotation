@@ -1,22 +1,11 @@
-#ifndef IMAGE_H
-#define IMAGE_H
+
 #include "image/image.h"
-#endif
 
-#ifndef BMP_IO_H
-#define BMP_IO_H
 #include "inputs/bmp_io.h"
-#endif
 
-#ifndef FILE_MAN_H
-#define FILE_MAN_H
 #include "inputs/file_open_close.h"
-#endif
 
-#ifndef ROTATE_H
-#define ROTATE_H
 #include "transformations/90rotate.h"
-#endif
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -53,4 +42,5 @@ int main(int argc, char *argv[]) {
     return 0;
 
 }
+
 
