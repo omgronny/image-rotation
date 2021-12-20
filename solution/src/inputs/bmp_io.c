@@ -97,6 +97,3 @@ bool to_bmp(FILE* out, const struct image* image) {
     return true;
 
 }
-
-
-

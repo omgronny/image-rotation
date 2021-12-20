@@ -61,7 +61,6 @@ struct image rotate(const struct image source, const uint16_t degrees ) {
         case 270: return rotate_270_degrees(source, pixels);
         default: return rotate_0_degrees(source, pixels);
 
-
     }
 
 

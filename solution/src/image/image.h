@@ -1,7 +1,5 @@
-
 #ifndef LAB3_IMAGE_H
 #define LAB3_IMAGE_H
-
 
 #include <stdbool.h>
 #include <stdint.h>

@@ -1,10 +1,7 @@
 #ifndef LAB3_FILE_OPEN_CLOSE_H
 #define LAB3_FILE_OPEN_CLOSE_H
 
-#ifndef IMAGE_H
-#define IMAGE_H
 #include "../image/image.h"
-#endif
 
 #include <stdbool.h>
 #include <stdio.h>

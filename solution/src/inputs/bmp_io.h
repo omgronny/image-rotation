@@ -4,10 +4,7 @@
 #include <malloc.h>
 #include <stdint.h>
 
-#ifndef IMAGE_H
-#define IMAGE_H
 #include "../image/image.h"
-#endif
 
 struct __attribute__((packed)) bmp_header
 {
