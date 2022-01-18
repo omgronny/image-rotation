@@ -8,7 +8,7 @@ bool file_open(const char* fileName, FILE** file, const char* mode) {
     *file = fopen(fileName, mode);
 
     if (file == NULL) {
-        printf("Error: %d\n", errno);
+        perror("Error: open file failed");
         return false;
     }
 

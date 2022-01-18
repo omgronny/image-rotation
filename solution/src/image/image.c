@@ -1,23 +1,20 @@
 #include "image.h"
 #include <malloc.h>
-
-struct image some_image(uint64_t width, uint64_t height, struct pixel *data) {
-    return (struct image) {.width = width, .height = height, .data = data};
-}
+#include <memory.h>
 
 struct image image_create(const size_t image_width, const size_t image_height) {
 
     struct pixel* pixels = malloc(sizeof(struct pixel) * image_width * image_height );
-
     return some_image(image_width, image_height, pixels);
-
 
 }
 
 struct image copy(struct image image) {
 
-    struct pixel* pixels = malloc(sizeof(struct pixel) * image.width * image.height );
+    size_t size_of_array = sizeof(struct pixel) * image.width * image.height;
 
+    struct pixel* pixels = malloc( size_of_array );
+    //memcpy_s(pixels, size_of_array, &image, size_of_array);
     for (size_t i = 0; i < image.height * image.width; ++i) {
         pixels[ i ] = image.data [ i ];
     }
@@ -26,6 +23,6 @@ struct image copy(struct image image) {
 
 }
 
-void image_destroy(struct image* image) {
+void image_destroy(const struct image* image) {
     free(image->data);
 }

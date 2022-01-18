@@ -14,33 +14,47 @@
 int main(int argc, char *argv[]) {
 
     if (argc != 3) {
-        printf("Некорректный ввод\n");
-        return 0;
+        perror("Incorrect arguments");
+        return -1;
     }
 
     FILE* file;
-
-    file_open(argv[1], &file, "r");
+    if (!file_open(argv[1], &file, "r")) {
+        return -2;
+    }
 
     struct image img = {0};
 
-    from_bmp(file, &img);
-    file_close(file);
+    if (!from_bmp(file, &img)) {
+        perror("error: bmp reader failed");
+        return -3;
+    }
+    if (!file_close(file)) {
+        perror("error: close file failed");
+        image_destroy(&img);
+        return -4;
+    }
 
     struct image res = rotate(img, 90);
-
+    image_destroy(&img);
     FILE* res_file;
 
-    file_open(argv[2], &res_file, "w");
+    if (!file_open(argv[2], &res_file, "w")) {
+        image_destroy(&res);
+        return -2;
+    }
 
-    to_bmp(res_file, &res);
-    file_close(res_file);
+    if (!to_bmp(res_file, &res)) {
+        perror("error: bmp writer failed");
+        image_destroy(&res);
+        try_to_close_file(res_file);
+        return -5;
+    }
 
-    image_destroy(&img);
     image_destroy(&res);
-
-    return 0;
+    return try_to_close_file(res_file);
 
 }
+
 
 

@@ -2,7 +2,26 @@
 #include "stdint.h"
 #include <stdbool.h>
 
-static size_t size_of_padding(const size_t width) {
+struct __attribute__((packed)) bmp_header
+{
+    uint16_t bfType;
+    uint32_t  bfileSize;
+    uint32_t bfReserved;
+    uint32_t bOffBits;
+    uint32_t biSize;
+    uint32_t biWidth;
+    uint32_t  biHeight;
+    uint16_t  biPlanes;
+    uint16_t biBitCount;
+    uint32_t biCompression;
+    uint32_t biSizeImage;
+    uint32_t biXPelsPerMeter;
+    uint32_t biYPelsPerMeter;
+    uint32_t biClrUsed;
+    uint32_t  biClrImportant;
+};
+
+inline static size_t size_of_padding(const size_t width) {
 
     if (width % 4 == 0) {
         return 0;
@@ -11,19 +30,19 @@ static size_t size_of_padding(const size_t width) {
 
 }
 
-static bool head_read(FILE* file, struct bmp_header* header) {
+inline static bool head_read(FILE* file, struct bmp_header* header) {
     return fread(header, sizeof(struct bmp_header), 1, file);
 }
 
-static size_t size_of_image(const struct image* image) {
+inline static size_t size_of_image(const struct image* image) {
     return (image->width * sizeof(struct pixel) + size_of_padding(image->width)) * image->height;
 }
 
-static size_t size_of_file(const struct image* image) {
+inline static size_t size_of_file(const struct image* image) {
     return size_of_image(image) + sizeof(struct bmp_header);
 }
 
-static struct bmp_header create_header(const struct image *image) {
+inline static struct bmp_header create_header(const struct image *image) {
     return (struct bmp_header) {
             .bfType = 19778,
             .bfileSize = size_of_file(image),
@@ -48,6 +67,7 @@ bool from_bmp(FILE* in, struct image* image) {
 
     struct bmp_header header = {0};
     if (!head_read(in, &header)) {
+        image_destroy(image);
         return false;
     }
 
@@ -58,9 +78,15 @@ bool from_bmp(FILE* in, struct image* image) {
 
     for (size_t i = 0; i < image->height; ++i) {
         for (size_t j = 0; j < image->width; ++j) {
-            fread(&(image->data[image->width * i + j]), sizeof(struct pixel), 1, in);
+            if (!fread(&(image->data[image->width * i + j]), sizeof(struct pixel), 1, in)) {
+                image_destroy(image);
+                return false;
+            }
         }
-        fseek(in, padding, SEEK_CUR);
+        if (fseek(in, padding, SEEK_CUR)) {
+            image_destroy(image);
+            return false;
+        }
     }
 
     return true;
@@ -74,26 +100,32 @@ bool to_bmp(FILE* out, const struct image* image) {
         return false;
     }
 
-    fseek(out, header.bOffBits, SEEK_SET);
+    if (fseek(out, header.bOffBits, SEEK_SET)) {
+        return false;
+    }
 
-    const int8_t zero = 0;
+    //const int8_t zero = 0;
+
+    const uint8_t paddings[3] = {0};
 
     const size_t padding = size_of_padding(image->width);
 
-    if (image->data != NULL) {
-        for (size_t i = 0; i < image->height; ++i) {
-
-            fwrite(image->data + i * image->width, image->width * sizeof(struct pixel), 1, out);
-
-            for (size_t j = 0; j < padding; ++j) {
-                fwrite(&zero, 1, 1, out);
-            }
-
-        }
-    } else {
+    if (image->data == NULL) {
         return false;
+    }
+
+    for (size_t i = 0; i < image->height; ++i) {
+
+        if (    !fwrite(image->data + i * image->width, image->width * sizeof(struct pixel), 1, out) ||
+                !fwrite(paddings, padding, 1, out) ) {
+            return false;
+        }
+
     }
 
     return true;
 
 }
+
+
+
